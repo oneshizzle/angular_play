@@ -1,0 +1,36 @@
+package dao
+
+import slick.driver.SQLiteDriver.api._
+import slick.lifted.{ ProvenShape, ForeignKeyQuery }
+
+// A Suppliers table with 6 columns: id, name, street, city, state, zip
+class Suppliers(tag: Tag)
+    extends Table[(Int, String, String, String, String, String)](tag, "SUPPLIERS") {
+
+  // This is the primary key column:
+  def id = column[Int]("SUP_ID", O.PrimaryKey)
+  def name = column[String]("SUP_NAME")
+  def street = column[String]("STREET")
+  def city = column[String]("CITY")
+  def state = column[String]("STATE")
+  def zip = column[String]("ZIP")
+
+  // Every table needs a * projection with the same type as the table's type parameter
+  def * : ProvenShape[(Int, String, String, String, String, String)] =
+    (id, name, street, city, state, zip)
+}
+
+// A Wines table with 3 columns: name, supplier id, price
+class Wines(tag: Tag)
+    extends Table[(String, Int, Double)](tag, "WINES") {
+
+  def name = column[String]("WINE_NAME", O.PrimaryKey)
+  def supID = column[Int]("SUP_ID")
+  def price = column[Double]("PRICE")
+
+  def * : ProvenShape[(String, Int, Double)] = (name, supID, price)
+
+  // A reified foreign key relation that can be navigated to create a join
+  def supplier: ForeignKeyQuery[Suppliers, (Int, String, String, String, String, String)] =
+    foreignKey("SUP_FK", supID, TableQuery[Suppliers])(_.id)
+}
